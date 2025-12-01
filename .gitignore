@@ -5,3 +5,4 @@
 *.bbl
 *.fls
 *.pdf
+/**/.ipynb_checkpoints

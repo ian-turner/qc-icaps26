@@ -16,6 +16,7 @@
 % These are recommended to typeset algorithms but not required. See the subsubsection on algorithms. Remove them if you don't have algorithms in your paper.
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{amsmath,amsfonts,amssymb}
 
 %
 % These are are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
@@ -220,6 +221,59 @@ approach is competitive.
 
 
 
+\appendix
+
+\section{Hurwitz Encoding}
+
+\begin{algorithm}[tb]
+    \caption{
+        Procedure for Hurwitz encoding of a unitary matrix $A$.
+        Here $\Theta(k)$ represents intialization of an all zero array of size $k$,
+        and the operator $A ~@_{i,j}~ B$ represents block multiplication of a matrix $B$ along rows $i,j$ of matrix $A$.
+    }
+
+    \label{fig:hurwitz_algo}
+
+    \textbf{Input}: unitary matrix $A \in U(n)$ \\
+    \textbf{Results}: real vectors $\theta,\phi \in [0, 2\pi)^k$, $\lambda \in [0, 2\pi)^n$
+
+    \begin{algorithmic}[1]
+        \STATE $k \gets \lfloor n(n-1)/2 \rfloor$
+        \STATE $\theta \gets \Theta(k)$
+        \STATE $\phi \gets \Theta(k)$
+        \STATE $x \gets 0$ 
+        \FOR {$i \in [0\dots(n-2)]$}
+            \FOR {$j \in [n \dots (i-1)]$}
+                \STATE $a \gets A_{i,i}$
+                \STATE $b \gets A_{j,i}$
+                \STATE $r \gets \sqrt{|a|^2+|b|^2}$
+                \STATE $c \gets |a| / r$
+                \STATE $s \gets |b| / r$
+                \IF {$b > 0$}
+                    \IF {$a > 0$}
+                        \STATE $\theta_x \gets \arctan (s/c)$
+                        \STATE $\phi_x \gets \arg (a) - \arg (b)$
+                    \ELSE
+                        \STATE $\theta_x \gets \pi/2$
+                        \STATE $\phi_x \gets - \arg (b)$
+                    \ENDIF
+                \ENDIF
+                \STATE $U \gets A ~@_{i,j}~ G$
+                \STATE $x \gets x + 1$
+            \ENDFOR
+        \ENDFOR
+        \STATE $d \gets $ diagonal($A$)
+        \STATE $d \gets d ~/~ |d|$
+        \STATE $\lambda \gets \arg(d)$
+    \end{algorithmic}
+\end{algorithm}
+
+The generalized Euler angle encoding, or `Hurwitz' encoding of a unitary matrix is the unique decomposition
+of a matrix $A \in U(n)$ into $n^2-1$ angles ranging from $0$ to $2\pi$ given by the algorithm in figure .
+
+
+
+
 % Uncomment the following to link to your code, datasets, an extended version or similar.
 % You must keep this block between (not within) the abstract and the main body of the paper.
 % \begin{links}
@@ -229,5 +283,7 @@ approach is competitive.
 % \end{links}
 
 \bibliography{refs.bib,forest.bib}
+
+
 
 \end{document}

@@ -232,13 +232,13 @@ approach is competitive.
         and the operator $A ~@_{i,j}~ B$ represents block multiplication of a matrix $B$ along rows $i,j$ of matrix $A$.
     }
 
-    \label{fig:hurwitz_algo}
+    \label{alg:hurwitz}
 
     \textbf{Input}: unitary matrix $A \in U(n)$ \\
     \textbf{Results}: real vectors $\theta,\phi \in [0, 2\pi)^k$, $\lambda \in [0, 2\pi)^n$
 
     \begin{algorithmic}[1]
-        \STATE $k \gets \lfloor n(n-1)/2 \rfloor$
+        \STATE $k \gets \lfloor n(n-1)~/~2 \rfloor$
         \STATE $\theta \gets \Theta(k)$
         \STATE $\phi \gets \Theta(k)$
         \STATE $x \gets 0$ 
@@ -247,11 +247,11 @@ approach is competitive.
                 \STATE $a \gets A_{i,i}$
                 \STATE $b \gets A_{j,i}$
                 \STATE $r \gets \sqrt{|a|^2+|b|^2}$
-                \STATE $c \gets |a| / r$
-                \STATE $s \gets |b| / r$
+                \STATE $c \gets |a| ~/~ r$
+                \STATE $s \gets |b| ~/~ r$
                 \IF {$b > 0$}
                     \IF {$a > 0$}
-                        \STATE $\theta_x \gets \arctan (s/c)$
+                        \STATE $\theta_x \gets \arctan (s~/~c)$
                         \STATE $\phi_x \gets \arg (a) - \arg (b)$
                     \ELSE
                         \STATE $\theta_x \gets \pi/2$
@@ -270,7 +270,8 @@ approach is competitive.
 \end{algorithm}
 
 The generalized Euler angle encoding, or `Hurwitz' encoding of a unitary matrix is the unique decomposition
-of a matrix $A \in U(n)$ into $n^2-1$ angles ranging from $0$ to $2\pi$ given by the algorithm in figure .
+of a matrix $A \in U(n)$ into $n^2-1$ angles ranging from $0$ to $2\pi$ given by algorithm \ref{alg:hurwitz}.
+Note that the pseudocode contains comparisons to 0, but in practice the values are compared within a tolerance value to ensure numerical stability.
 
 
 

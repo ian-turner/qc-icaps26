@@ -258,11 +258,12 @@ approach is competitive.
                         \STATE $\phi_x \gets - \arg (b)$
                     \ENDIF
                 \ENDIF
-                \STATE $U \gets A ~@_{i,j}~ G$
+                \STATE $G \gets \begin{bmatrix} c & e^{i\phi_x}s \\ -e^{-i\phi_x}s & c \end{bmatrix}$
+                \STATE $A \gets A ~@_{i,j}~ G$
                 \STATE $x \gets x + 1$
             \ENDFOR
         \ENDFOR
-        \STATE $d \gets $ diagonal($A$)
+        \STATE $d \gets \text{diagonal}(A)$
         \STATE $d \gets d ~/~ |d|$
         \STATE $\lambda \gets \arg(d)$
     \end{algorithmic}

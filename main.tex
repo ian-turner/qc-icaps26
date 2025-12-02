@@ -241,7 +241,7 @@ approach is competitive.
         \STATE $k \gets \lfloor n(n-1)~/~2 \rfloor$
         \STATE $\theta \gets \Theta(k)$
         \STATE $\phi \gets \Theta(k)$
-        \STATE $x \gets 0$ 
+        \STATE $x \gets 1$ 
         \FOR {$i \in [1\dots(n-1)]$}
             \FOR {$j \in [n \dots (i+1)]$}
                 \STATE $a \gets A_{i,i}$
@@ -249,17 +249,17 @@ approach is competitive.
                 \STATE $r \gets \sqrt{|a|^2+|b|^2}$
                 \STATE $c \gets |a| ~/~ r$
                 \STATE $s \gets |b| ~/~ r$
-                \IF {$b > 0$}
-                    \IF {$a > 0$}
+                \IF {$b \neq 0$}
+                    \IF {$a \neq 0$}
                         \STATE $\theta_x \gets \arctan (s~/~c)$
                         \STATE $\phi_x \gets \arg (a) - \arg (b)$
                     \ELSE
                         \STATE $\theta_x \gets \pi/2$
                         \STATE $\phi_x \gets - \arg (b)$
                     \ENDIF
+                    \STATE $G \gets \begin{bmatrix} c & e^{i\phi_x}s \\ -e^{-i\phi_x}s & c \end{bmatrix}$
+                    \STATE $A \gets A ~@_{i,j}~ G$
                 \ENDIF
-                \STATE $G \gets \begin{bmatrix} c & e^{i\phi_x}s \\ -e^{-i\phi_x}s & c \end{bmatrix}$
-                \STATE $A \gets A ~@_{i,j}~ G$
                 \STATE $x \gets x + 1$
             \ENDFOR
         \ENDFOR

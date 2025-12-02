@@ -229,21 +229,21 @@ approach is competitive.
     \caption{
         Procedure for Hurwitz encoding of a unitary matrix $A$.
         Here $\Theta(k)$ represents intialization of an all zero array of size $k$,
-        and the operator $A ~@_{i,j}~ B$ represents block multiplication of a matrix $B$ along rows $i,j$ of matrix $A$.
+        and the operator $A ~@_{i,j}~ B$ represents the block multiplication of a $2 \times 2$ matrix $B$ along rows $i,j$ of matrix $A$.
     }
 
     \label{alg:hurwitz}
 
     \textbf{Input}: unitary matrix $A \in U(n)$ \\
-    \textbf{Results}: real vectors $\theta,\phi \in [0, 2\pi)^k$, $\lambda \in [0, 2\pi)^n$
+    \textbf{Output}: real vectors $\theta,\phi \in [0, 2\pi)^k$, $\lambda \in [0, 2\pi)^n$
 
     \begin{algorithmic}[1]
         \STATE $k \gets \lfloor n(n-1)~/~2 \rfloor$
         \STATE $\theta \gets \Theta(k)$
         \STATE $\phi \gets \Theta(k)$
         \STATE $x \gets 0$ 
-        \FOR {$i \in [0\dots(n-2)]$}
-            \FOR {$j \in [n \dots (i-1)]$}
+        \FOR {$i \in [1\dots(n-1)]$}
+            \FOR {$j \in [n \dots (i+1)]$}
                 \STATE $a \gets A_{i,i}$
                 \STATE $b \gets A_{j,i}$
                 \STATE $r \gets \sqrt{|a|^2+|b|^2}$
@@ -264,15 +264,17 @@ approach is competitive.
             \ENDFOR
         \ENDFOR
         \STATE $d \gets \text{diagonal}(A)$
-        \STATE $d \gets d ~/~ |d|$
         \STATE $\lambda \gets \arg(d)$
     \end{algorithmic}
 \end{algorithm}
 
 The generalized Euler angle encoding, or `Hurwitz' encoding of a unitary matrix is the unique decomposition
-of a matrix $A \in U(n)$ into $n^2-1$ angles ranging from $0$ to $2\pi$ given by algorithm \ref{alg:hurwitz}.
+of a matrix $A \in U(n)$ into $n^2$ angles ranging from $0$ to $2\pi$ given by algorithm \ref{alg:hurwitz}.
 Note that the pseudocode contains comparisons to 0, but in practice the values are compared within a tolerance value to ensure numerical stability.
-
+For the purpose of quantum circuit synthesis, the global phase can also be removed by first projecting the unitary
+matrix into a special unitary matrix according to the function $\Pi : U(n) \rightarrow SU(n)$, defined as
+$\Pi (A) = e^{-i (\arg(\text{det}(A)))/n} A$.
+The last angle in $\lambda$ can then be disregarded, and the resulting representation will contain $n^2-1$ angles.
 
 
 

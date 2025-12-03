@@ -167,14 +167,14 @@
 
 \begin{abstract}
 Quantum circuit synthesis is the process of implementing
-a quantum algorithm with a given discrete gate set. In this
+a quantum algorithm with a given gate set. In this
 paper, we first show how this problem can be posed as a
 pathfinding problem. Next, we use DeepCubeA to learn a
 heuristic function for quantum circuit synthesis for one to
 three qubit circuits with deep reinforcement learning and
 solve problem instances with batch weighed A* search. We
-compare our approach against several other state-of-the-art
-quantum circuit synthesis algorithms and show that are our
+compare our approach against a state-of-the-art
+quantum circuit synthesis tool and show that are our
 approach is competitive.
 \end{abstract}
 
@@ -229,7 +229,9 @@ approach is competitive.
     \caption{
         Procedure for Hurwitz encoding of a unitary matrix $A$.
         Here $\Theta(k)$ represents intialization of an all zero array of size $k$,
-        and the operator $A ~@_{i,j}~ B$ represents the block multiplication of a $2 \times 2$ matrix $B$ along rows $i,j$ of matrix $A$.
+        the operator $X ~@_{i,j}~ Y$ represents the block multiplication
+        of a $2 \times 2$ matrix $X$ along rows $i,j$ of matrix $Y$,
+        and the `diagonal' function selects the diagonal elements of a matrix.
     }
 
     \label{alg:hurwitz}
@@ -246,10 +248,10 @@ approach is competitive.
             \FOR {$j \in [n \dots (i+1)]$}
                 \STATE $a \gets A_{i,i}$
                 \STATE $b \gets A_{j,i}$
-                \STATE $r \gets \sqrt{|a|^2+|b|^2}$
-                \STATE $c \gets |a| ~/~ r$
-                \STATE $s \gets |b| ~/~ r$
                 \IF {$b \neq 0$}
+                    \STATE $r \gets \sqrt{|a|^2+|b|^2}$
+                    \STATE $c \gets |a| ~/~ r$
+                    \STATE $s \gets |b| ~/~ r$
                     \IF {$a \neq 0$}
                         \STATE $\theta_x \gets \arctan (s~/~c)$
                         \STATE $\phi_x \gets \arg (a) - \arg (b)$
@@ -258,7 +260,7 @@ approach is competitive.
                         \STATE $\phi_x \gets - \arg (b)$
                     \ENDIF
                     \STATE $G \gets \begin{bmatrix} c & e^{i\phi_x}s \\ -e^{-i\phi_x}s & c \end{bmatrix}$
-                    \STATE $A \gets A ~@_{i,j}~ G$
+                    \STATE $A \gets G ~@_{i,j}~ A$
                 \ENDIF
                 \STATE $x \gets x + 1$
             \ENDFOR

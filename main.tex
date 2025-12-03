@@ -183,11 +183,35 @@ approach is competitive.
 %% SECTION Introduction
 \section{Introduction}
 
+The realization of quantum algorithms on real-world quantum computers is accomplished through
+quantum compiling \cite{maronese2022quantum}, also known as quantum circuit synthesis.
+Given a quantum algorithm, quantum compiling finds a quantum circuit that implements that algorithm.
+A quantum algorithm can be represented as a matrix of size $2^n \times 2^n$, with $n$ being the number of qubits.
+A quantum circuit is a sequence of gates that perform operations on one or more qubits,
+where a qubit is an irreducible unit of quantum information.
+Given a quantum circuit, the matrix that represents the algorithm it implements is obtained by starting with the
+identity matrix and changing its entries according to matrix multiplications determined by the gates used in the circuit.
+As a result, quantum compiling can be posed as a pathfinding problem, where the start state
+is the identity matrix, the goal is a given quantum algorithm, the transitions are quantum gates, and the transition costs
+are determined by a combination of quantum gate execution time and the noise the gate introduces.
+
 
 
 
 %% SECTION Background
 \section{Background}
+
+
+\subsection{Quantum Computing}
+
+
+\paragraph{Qubits and Gates}
+
+
+\paragraph{Clifford+T Gate Set}
+
+
+\paragraph{Unitary Synthesis}
 
 
 

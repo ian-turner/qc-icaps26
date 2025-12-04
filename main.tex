@@ -196,6 +196,14 @@ is the identity matrix, the goal is a given quantum algorithm, the transitions a
 are determined by a combination of quantum gate execution time and the noise the gate introduces.
 
 
+Finding quantum circuits that implement a given algorithm is a non-trivial task that can sometimes take state-of-the-art
+methods several hours, even for single qubit operators \cite{paradis2024synthetiq}.
+Given that we can pose this as a pathfinding problem, we build on the DeepCubeA algorithm \cite{agostinelli2019solving}
+and hindsight experience replay (HER) \cite{andrychowicz2017hindsight} to use deep reinforcement learning to learn
+a heuristic function that maps a given quantum circuit and quantum goal algorithm to an estimate of the cost of a
+shortest path (i.e. ``cost-to-go'') from the given circuit to a circuit that implements the goal algorithm.
+
+
 
 
 %% SECTION Background

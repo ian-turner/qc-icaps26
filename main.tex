@@ -18,6 +18,8 @@
 \usepackage{algorithmic}
 \usepackage{amsmath,amsfonts,amssymb}
 
+\usepackage{subcaption}
+
 %
 % These are are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
 \usepackage{newfloat}
@@ -77,6 +79,8 @@
 % \tiny -- This is not an acceptable font size.
 % \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
 % \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
+
+\graphicspath{{ ./images }}
 
 \setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
 
@@ -238,6 +242,26 @@ shortest path (i.e. ``cost-to-go'') from the given circuit to a circuit that imp
 
 %% SECTION Experiments
 \section{Experiments}
+
+
+
+\begin{figure*}
+	\begin{subfigure}{0.2\textwidth}
+		\includegraphics[width=\textwidth]{images/qc_U.png}
+		\caption{Arbitrary 2-qubit unitary}
+	\end{subfigure}
+	\begin{subfigure}{0.76\textwidth}
+		\includegraphics[width=\textwidth]{images/qc_U3.png}
+		\caption{Unitary decomposed into arbitrary 1-qubit unitaries and CNOTs}
+	\end{subfigure}
+	\\
+	\begin{subfigure}{\textwidth}
+		\includegraphics[width=\textwidth]{images/qc_tr.png}
+		\caption{Final compiled circuit after synthesizing each 1-qubit unitary with \textbf{trasyn}}
+	\end{subfigure}
+	\caption{Process for synthesis of multi-qubit circuits using \textbf{trasyn}}
+	\label{fig:trasyn_multi_process}
+\end{figure*}
 
 
 

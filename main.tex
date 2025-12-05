@@ -247,20 +247,43 @@ shortest path (i.e. ``cost-to-go'') from the given circuit to a circuit that imp
 
 \begin{figure*}
 	\begin{subfigure}{0.2\textwidth}
-		\includegraphics[width=\textwidth]{images/qc_U.png}
+		\includegraphics[width=\textwidth]{images/qc_U}
 		\caption{Arbitrary 2-qubit unitary}
 	\end{subfigure}
 	\begin{subfigure}{0.76\textwidth}
-		\includegraphics[width=\textwidth]{images/qc_U3.png}
+		\includegraphics[width=\textwidth]{images/qc_U3}
 		\caption{Unitary decomposed into arbitrary 1-qubit unitaries and CNOTs}
 	\end{subfigure}
 	\\
 	\begin{subfigure}{\textwidth}
-		\includegraphics[width=\textwidth]{images/qc_tr.png}
+		\includegraphics[width=\textwidth]{images/qc_tr}
 		\caption{Final compiled circuit after synthesizing each 1-qubit unitary with \textbf{trasyn}}
 	\end{subfigure}
 	\caption{Process for synthesis of multi-qubit circuits using \textbf{trasyn}}
 	\label{fig:trasyn_multi_process}
+\end{figure*}
+
+
+
+
+
+
+\begin{figure*}
+	\centering
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{images/1q-bench}
+		\caption{1-qubit synthesis with $\epsilon=0.01$}
+	\end{subfigure}
+
+	\begin{subfigure}{\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{images/2q-bench}
+		\caption{2-qubit synthesis with $\epsilon=0.5$}
+	\end{subfigure}
+
+	\caption{A* search vs \textbf{trasyn} for synthesis of arbitrary 1, 2, and 3-qubit unitaries}
 \end{figure*}
 
 

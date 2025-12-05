@@ -18,8 +18,6 @@
 \usepackage{algorithmic}
 \usepackage{amsmath,amsfonts,amssymb}
 
-\usepackage{subcaption}
-
 %
 % These are are recommended to typeset listings but not required. See the subsubsection on listing. Remove this block if you don't have listings in your paper.
 \usepackage{newfloat}
@@ -80,7 +78,10 @@
 % \vspace{- -- No negative value may be used in proximity of a caption, figure, table, section, subsection, subsubsection, or reference
 % \vskip{- -- No negative value may be used to alter spacing above or below a caption, figure, table, section, subsection, subsubsection, or reference
 
+% User-added config
 \graphicspath{{ ./images }}
+\usepackage{subcaption}
+\usepackage{cite}
 
 \setcounter{secnumdepth}{2} %May be changed to 1 or 2 if section numbers are desired.
 
@@ -187,11 +188,19 @@ approach is competitive.
 %% SECTION Introduction
 \section{Introduction}
 
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.4\textwidth]{images/qc_ex.png}
+	\caption{Example of a quantum circuit composed of Clifford and T gates}
+	\label{fig:toffoli}
+\end{figure}
+
 The realization of quantum algorithms on real-world quantum computers is accomplished through
 quantum compiling \cite{maronese2022quantum}, also known as quantum circuit synthesis.
 Given a quantum algorithm, quantum compiling finds a quantum circuit that implements that algorithm.
 A quantum algorithm can be represented as a matrix of size $2^n \times 2^n$, with $n$ being the number of qubits.
-A quantum circuit is a sequence of gates that perform operations on one or more qubits,
+A quantum circuit (Figure \ref{fig:toffoli}) is a sequence of gates that perform operations on one or more qubits,
 where a qubit is an irreducible unit of quantum information.
 Given a quantum circuit, the matrix that represents the algorithm it implements is obtained by starting with the
 identity matrix and changing its entries according to matrix multiplications determined by the gates used in the circuit.
@@ -206,6 +215,17 @@ Given that we can pose this as a pathfinding problem, we build on the DeepCubeA 
 and hindsight experience replay (HER) \cite{andrychowicz2017hindsight} to use deep reinforcement learning to learn
 a heuristic function that maps a given quantum circuit and quantum goal algorithm to an estimate of the cost of a
 shortest path (i.e. ``cost-to-go'') from the given circuit to a circuit that implements the goal algorithm.
+Previous work that has built on DeepCubeA to perform quantum compiling used the reversibility of quantum gates
+to set the starting state to be the quantum algorithm and the goal to be the identity matrix
+\cite{zhang2020topological,bao2024twisty,chen2024efficient}.
+Our work distinguishes itself from this previous work since the starting state is the identity matrix and the goal is
+given as the quantum algorithm.
+This distinction then allows our approach to be modified for the specification of goals as
+a set of goal states through partial specification of goal matrix entries or through abstraction using formal logic.
+This may be necessary if certain properties of the algorithm (i.e. entries in the matrix) are known while other parts are not
+known or not relevant.
+These modifications that allow for this are already present in existing literature \cite{agostinelli2024specifying}
+and can be applied to the work presented in the paper.
 
 
 

@@ -247,6 +247,50 @@ and can be applied to the work presented in the paper.
 
 
 
+\subsection{Pathfinding}
+Pathfinding is the process of finding a sequence of actions that forms a path between a given start state and a given goal, where a goal is a set of states considered goal states. A pathfinding domain is defined by a weighted directed graph, where nodes represent states, edges represent transitions between states, and weights represent transition costs \cite{pohl1970heuristic}. The transitions can be thought of as resulting from a set of actions, $\mathcal{A}$, and the transition function function, $T$, returns state, $s'$, given state, $s$, and action, $a$, if and only if there is an edge between state $s$ and $s'$ for some action, $a$ (i.e. $s' = T(s,a)$). The transition cost function, $c$, returns the cost of taking action, $a$, in states, $s$ (i.e. $c(s,a)$). Given a domain, a pathfinding problem instance is defined by a start state and a goal. Given a path that is a solution to a problem instance, the path cost is the sum of transition costs. In this work, the states are matrices representing quantum algorithms, transitions are the application of quantum gates, which produce new matrices, and transition costs are 1 for all gates. In future work, we will consider assigning a higher transition cost to gates, such as the $T$ gate, which add more execution time or noise to the circuit.
+
+\subsubsection{Heuristic Search}
+A* search \cite{hart1968formal} is a search algorithm designed to find a path between two nodes in a weighted directed graph. Similar to other algorithms like depth-first search and Djikstra's algorithm, A* keeps a priority queue of nodes, ordered from least to greatest according
+to the function
+\begin{equation}
+    f(n)=g(n)+h(n)
+\end{equation}
+where $g(n)$ is the path cost (sum of all transition costs taken to reach node
+$n$ and $h(n)$ is the heuristic function value of state associated with $n$.
+
+While searching each node keeps track of the path cost and heuristic function value
+as well as a connection to its parent node and the action taken to generate the state from its parent. The A* search process is begun when a single node with no parents representing the start state is added to the queue, and is ended once a node associated with a goal state is selected for expansion or there are no more nodes to expand.
+
+In practice, a significant speedup can be achieved with heuristic functions represented by neural networks by batching the expansion steps together and exploiting the parallelism of graphics processing units (GPUs), as well as modifying the cost function to be $f(n)=\lambda g(n)+h(n)$,
+where $\lambda \in [0,1]$ can be adjusted to place less important on the path cost of a state and more on the heuristic value. This batched and weighted version of A* search is referred to as batch weighted A* search (BWAS).
+
+\subsection{DeepCubeA}
+
+DeepCubeA \cite{agostinelli2019solving} is an algorithm that learns a domain-specific heuristic function represented as a deep neural network (DNN) \cite{schmidhuber2015deep,lecun2015deep} using deep reinforcement learning \cite{sutton2018reinforcement}, which is then used with BWAS to solve problem instances. While DeepCubeA originally assumed the goal was known before training and took transitions in reverse from the goal, extensions have built on hindsight experience replay (HER) \cite{andrychowicz2017hindsight} to learn heuristic functions that generalize over both states and goals \cite{agostinelli2024specifying,agostinelli2024learning}.
+
+\subsubsection{Learning the Heuristic Function}
+The heuristic function is learned with approximate value iteration \cite{puterman1978modified,bertsekas1996neuro}, which iteratively trains a model to approximate a Bellman update for a set of problem instances. The Bellman update, in the context of pathfinding (shown in Equation \ref{eq:bellmanup}) uses the Bellman optimality equation as an update rule. Approximate value iteration can be used to train a DNN, $h_\theta$, with parameters $\theta$, with gradient descent using the loss function in Equation \ref{eq:viloss}, where $N$ is the batch size. The heuristic function used to calculate the Bellman update in Equation \ref{eq:bellmanup} is $h_{\theta^-}$, where $\theta^-$ is the parameters of the target network \cite{mnih2015human} which are periodically updated to $\theta$. Approximate value iteration with DNNs is referred to as deep approximate value iteration (DAVI).
+
+\begin{equation} \label{eq:bellmanup}
+	\small
+	h'(s,g) =
+	\begin{cases}
+		0, & \text{if } s \in g, \\
+		\min\limits_{a \in \mathcal{A}}{c(s,a) + h(T(s,a),g)}, & \text{otherwise}.
+	\end{cases}
+\end{equation}
+
+
+\begin{equation} \label{eq:viloss}
+	L({\theta}) = \frac{1}{N}\sum_{i}^N{(h'(s_i,g_i) - h_{\theta}(s_i,g_i))^2}
+\end{equation}
+
+
+We build on hindsight experience replay (HER) \cite{andrychowicz2017hindsight} to generate start state and goal pairs without having to start from a predetermined goal and take actions in reverse. We accomplish this by first starting with the identity matrix and taking random actions to generate a start state. From this generated start state, we then take random actions to generate a goal state.
+
+
+
 
 %% SECTION Related work
 \section{Related Work}

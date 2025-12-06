@@ -268,8 +268,9 @@ is defined as the block matrix
 		\vdots     & \ddots & \vdots        \\
 		a_{m_11} B & \dots  &  a_{m_1n_1} B \\
 	\end{bmatrix}
-	\in \mathbb{C}^{m_1m_2 \times n_1n_2}.
+	\in \mathbb{C}^{m_1m_2 \times n_1n_2}
 \end{equation}
+where $a_{ij}$ is the $i,j$-the element of the matrix $A$.
 The basis states of an $n$-qubit system can be represented as a tensor product of $n$ one-qubit states,
 for example $|011\rangle = |0\rangle \otimes |1\rangle \otimes |1\rangle$.
 
@@ -364,7 +365,7 @@ With the addition of the $T$ gate, the set will be able to approximate any unita
 
 \paragraph{Unitary Synthesis}
 
-Given that discrete gate sets such as Clifford+T are likely to be the basis of near-term fault-tolerant quantum computing,
+Given that discrete gate sets such as Clifford+T are likely to be the basis of near-term fault-tolerant quantum computing [CITATION NEEDED],
 methods that can synthesize arbitrary unitaries from these discrete gate sets are needed.
 The problem of unitary synthesis is this: given a unitary specifiation $U$, find a sequence of gates
 ${g_1,...,g_n}$ chosen from a discrete gate set that implements a unitary $V = g_1 \times \cdots \times g_n$
@@ -421,6 +422,13 @@ We build on hindsight experience replay (HER) \cite{andrychowicz2017hindsight} t
 %% SECTION Related work
 \section{Related Work}
 
+Many methods for unitary synthesis have been explored the programs \textbf{synthetiq} \cite{paradis2024synthetiq}
+and \textbf{trasyn} \cite{hao2025reducing} use random gate sampling search guided by the unitary distance function.
+The program \textbf{gridsynth} \cite{ross2014optimal} uses advanced domain-specific knowledge to analytically synthesize
+optimal circuits, but is limited to only one-qubit $R_z(\theta)$ gates.
+These methods all compile unitaries with the objective of reducing the number of  $T$ gates,
+given that $T$ gates are dramatically more expensive to produce on quantum hardware than the Clifford gates
+[CITATION NEEDED].
 
 
 

@@ -294,8 +294,77 @@ This method has the advantage that if two unitaries $A$ and $B$ differ only by a
 
 \paragraph{Clifford+T Gate Set}
 
+If a finite set of gates is universal, then any unitary can be approximated by a finite sequence
+of those gates up to any arbitrary tolerance value $\epsilon$ \cite{nielsen2010quantum}.
+The most commonly studied discrete gate set is the Clifford+T set, as it is considered likely that the Clifford+T
+set will be the basis of fault-tolerant quantum computing.
+The set is a union of the Clifford gate set and the $T$ gate.
+The Clifford set can be generated (via matrix multiplication and the tensor product) by the three Pauli matrices
+\begin{equation}
+	X =
+	\begin{bmatrix}
+		0 & 1 \\
+		1 & 0
+	\end{bmatrix}
+	,~~
+	Y =
+	\begin{bmatrix}
+		0 & -i \\
+		i & 0
+	\end{bmatrix}
+	,~~
+	Z =
+	\begin{bmatrix}
+		1 & 0 \\
+		0 & -1
+	\end{bmatrix}
+\end{equation}
+and the Hadamard and $S$ gates
+\begin{equation}
+	H =
+	\frac{1}{\sqrt{2}}
+	\begin{bmatrix}
+		1 & 1 \\
+		1 & -1
+	\end{bmatrix}
+	,~~
+	S =
+	\begin{bmatrix}
+		1 & 0 \\
+		0 & i
+	\end{bmatrix}
+\end{equation}
+and, in the case of multi-qubit circuits, the two-qubit gate CNOT
+\begin{equation}
+	\text{CNOT} =
+	\begin{bmatrix}
+		1 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0 \\
+		0 & 0 & 0 & 1 \\
+		0 & 0 & 1 & 0
+	\end{bmatrix}.
+\end{equation}
+Note that this is not the only generating gate set for the Clifford operators.
+Since the Clifford set is not universal (it only generates a finite number of unique circuits),
+we must add the $T$ gate
+\begin{equation}
+	T =
+	\begin{bmatrix}
+		1 & 0 \\
+		0 & e^{i\frac{\pi}{4}}
+	\end{bmatrix}.
+\end{equation}
+With the addition of the $T$ gate, the set will be able to approximate any unitary.
+
 
 \paragraph{Unitary Synthesis}
+
+Given that discrete gate sets such as Clifford+T are likely to be the basis of near-term fault-tolerant quantum computing,
+methods that can synthesize arbitrary unitaries from these discrete gate sets are needed.
+The problem of unitary synthesis is this: given a unitary specifiation $U$, find a sequence of gates
+${g_1,...,g_n}$ chosen from a discrete gate set that implements a unitary $V = g_1 \times \cdots \times g_n$
+such that $d(U,V)\leq \epsilon$, where $\epsilon$ is the `tolerance' value of the compilation.
+When $\epsilon > 0$, we classify the problem as approximate synthesis, and when $\epsilon=0$ we classify it as exact synthesis.
 
 
 

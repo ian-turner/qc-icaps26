@@ -270,7 +270,7 @@ is defined as the block matrix
 	\end{bmatrix}
 	\in \mathbb{C}^{m_1m_2 \times n_1n_2}.
 \end{equation}
-The basis states of an $n$-qubit system can be represented using a tensor product of $n$ one-qubit states,
+The basis states of an $n$-qubit system can be represented as a tensor product of $n$ one-qubit states,
 for example $|011\rangle = |0\rangle \otimes |1\rangle \otimes |1\rangle$.
 
 
@@ -279,8 +279,13 @@ for example $|011\rangle = |0\rangle \otimes |1\rangle \otimes |1\rangle$.
 Quantum gates transform quantum states into new states.
 Disregarding measurement operations, a quantum gate can be represented by a unitary matrix $U \in \mathbb{C}^{2^n \times 2^n}$.
 A matrix is unitary if $UU^{\dagger}=U^{\dagger}U=I$, where $U^{\dagger}$ is the conjugate transpose of $U$.
-As a consequence of the global phase invariance of quantum states, two gates whose unitaries differ only by a complex
+As a consequence of the global phase invariance of quantum states, two circuits whose unitaries differ only by a complex
 phase are also considered equivalent.
+If a unitary is applied to only a subset of the qubits in a state, then the entire operation can be represented
+as a tensor product of the unitary and the identity matrix on the other qubits, for example the matrix
+$I \otimes I \otimes U$ represents the unitary $U$ applied to the third qubit in a three qubit quantum state, and no operation
+applied to the first and second qubits.
+
 
 There are many methods for calculating the `distance' between two unitary operators.
 In this paper we use the Hilbert-Schmidt distance function
@@ -520,8 +525,7 @@ We build on hindsight experience replay (HER) \cite{andrychowicz2017hindsight} t
 
     \begin{algorithmic}[1]
         \STATE $k \gets \lfloor n(n-1)~/~2 \rfloor$
-        \STATE $\theta \gets \Theta(k)$
-        \STATE $\phi \gets \Theta(k)$
+        \STATE $\theta, \phi \gets \Theta(k)$
         \STATE $x \gets 1$ 
         \FOR {$i \in [1\dots(n-1)]$}
             \FOR {$j \in [n \dots (i+1)]$}

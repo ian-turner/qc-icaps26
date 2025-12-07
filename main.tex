@@ -422,13 +422,17 @@ We build on hindsight experience replay (HER) \cite{andrychowicz2017hindsight} t
 %% SECTION Related work
 \section{Related Work}
 
-Many methods for unitary synthesis have been explored the programs \textbf{synthetiq} \cite{paradis2024synthetiq}
-and \textbf{trasyn} \cite{hao2025reducing} use random gate sampling search guided by the unitary distance function.
-The program \textbf{gridsynth} \cite{ross2014optimal} uses advanced domain-specific knowledge to analytically synthesize
-optimal circuits, but is limited to only one-qubit $R_z(\theta)$ gates.
-These methods all compile unitaries with the objective of reducing the number of  $T$ gates,
-given that $T$ gates are dramatically more expensive to produce on quantum hardware than the Clifford gates
+Many methods for unitary synthesis have been explored with domain-specific synthesizers. The programs \textbf{synthetiq} \cite{paradis2024synthetiq}
+and \textbf{trasyn} \cite{hao2025reducing} use a gate sampling search guided by the unitary distance function. The program \textbf{gridsynth} \cite{ross2014optimal} uses advanced domain-specific knowledge to analytically synthesize optimal circuits, but is limited to only one-qubit $R_z(\theta)$ gates. These methods all compile unitaries with the objective of reducing the number of  $T$ gates, given that $T$ gates are dramatically more expensive to produce on quantum hardware than the Clifford gates
 [CITATION NEEDED].
+
+On the other hand, deep reinforcement learning and heuristic search has been used to synthesize quantum circuits.\citet{zhang2020topological} build on DeepCubeA to learn a heuristic function for topological quantum compilation of Fibonacci anyons. \cite{bao2024twisty} learn a heuristic function that is then used with beam search for Clifford gates. \cite{chen2024efficient} use deep Q-learning \cite{watkins1992q,mnih2015human} and Q* search \cite{agostinelli2024q} to perform one and two-qubit synthesis for Fibonacci anyons, HRC gate set \cite{harrow2002efficient}, and the Clifford + T gate set. \cite{weiden2025making} explores modifications to the neural networks
+and training processes used in Clifford+T synthesis.  \citet{rietsch2024unitary} explores applications of reinforcement learning to Clifford + T synthesis for multiple qubits and find they are competitive with methods, such as synthetiq, in terms of gate length, but are 10 to 100 times slower for 2 and 3 qubits. 
+
+In contrast with previous methods for Cliffor+T synthesis, we first perform a systematic empirical study on what DNN encodings perform best for quantum circuit synthesis. After training the heuristic function, we use BWAS, to take advantage of paralellism provided by GPUs, which other methods often do not take advantage of. As a result, to the best of our knowledge, we are the first machine learning-based approach that is competitive with, and sometimes superior to, domain-specific programs, such as synthetiq and trasyn, in terms of both gate count and solve time. 
+
+% While these previous approaches assume a fixed goal of the identity matrix and use reverse quantum gates to find a path from a specified algorithm to the identity, we instead find a path from the identity to the specified algorithm using the given gate set. This then allows future iterations of our work to include the specification of sets of goal states through partial goal specification or abstraction through formal logic \cite{agostinelli2024specifying,agostinelli2025conflict}, offering greater flexibility to practitioners and reducing the knowledge required to specify an algorithm.
+
 
 
 

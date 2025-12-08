@@ -175,8 +175,8 @@ Quantum circuit synthesis is the process of implementing
 a quantum algorithm with a given gate set. In this
 paper, we first show how this problem can be posed as a
 pathfinding problem. Next, we use DeepCubeA to learn a
-heuristic function for quantum circuit synthesis for one to
-three qubit circuits with deep reinforcement learning and
+heuristic function for quantum circuit synthesis for one and
+two qubit circuits with deep reinforcement learning and
 solve problem instances with batch weighed A* search. We
 compare our approach against a state-of-the-art
 quantum circuit synthesis tool and show that are our
@@ -473,25 +473,40 @@ and $M$ is the matrix representing the actions needed to go from the state to th
 This gives us the overall transformation from state to goal, which is also a unitary matrix.
 
 
-\noindent
-[GLOBAL PHASE]
+To handle the global phase invariance property of quantum circuits, we project the unitaries into the
+special unitary group, which is isomorphic to the unitary group up to a global phase.
+This results in a function $\Pi : U(n) \rightarrow SU(n)$, defined as
+$\Pi (A) = e^{-i (\arg(\text{det}(A)))/n} A$.
+This ensures that states that differ only by a global phase will be represented equivalently when input to the neural network.
 
 
-
-\noindent
-[QUATERNIONS]
-
-
-
-\noindent
-[HURWITZ]
-
+We explore three methods of representing the unitaries when inputting them into the neural network.
+The first of these is simply to flatten the real and imaginary components of the matrix into a vector
+and input them into the neural network.
+The second is to convert them into quaternions, however this approach is only valid for the single-qubit case,
+which is represented by $SU(2)$.
+The third is the generalized Euler angle encoding, which maps a unitary $U \in U(n)$ to a set of $n^2-1$ angles
+which uniquely describe the matrix up to a global phase.
 
 
-\noindent
-[NERF ENCODING]
-
-
+We also use Neural Radiance Field Encoding (NeRF) \cite{mildenhall2021nerf},
+which was originally developed for image processing, but has been shown to improve neural network performance when
+dealing with unitary matrices \cite{weiden2025making}.
+NeRF encoding can be described as a function $\gamma : \mathbb{R} \rightarrow \mathbb{R}^{2L}$ that maps real numbers
+to a vector of $2L$ real numbers, where $L$ is an arbitrary parameter.
+The function is defined as
+\begin{equation}
+	\gamma(x) =
+	\begin{bmatrix}
+		\cos(2^0 x) \\
+		\sin(2^0 x) \\
+		\vdots \\
+		\cos(2^{L-1} x) \\
+		\sin(2^{L-1} x)
+	\end{bmatrix}.
+\end{equation}
+It ensures that the input will be between $-1$ and $1$, and has the effect of amplifying small or high-frequency variations in
+input data so that neural networks can perceive them, which has been shown to improve performance in a variety of domains.
 
 
 \subsection{Training}
@@ -561,18 +576,18 @@ This gives us the overall transformation from state to goal, which is also a uni
 
 \appendix
 
-\section{Hurwitz Encoding}
+\section{Euler Angle Encoding}
 
 \begin{algorithm}[tb]
     \caption{
-        Procedure for Hurwitz encoding of a unitary matrix $A$.
+        Procedure for Euler angle encoding of a unitary matrix $A$.
         Here $\Theta(k)$ represents initialization of an all zero array of size $k$,
         the operator $X ~@_{i,j}~ Y$ represents the block multiplication
         of a $2 \times 2$ matrix $X$ along rows $i,j$ of matrix $Y$,
         and the `diagonal' function selects the diagonal elements of a matrix.
     }
 
-    \label{alg:hurwitz}
+    \label{alg:euler}
 
     \textbf{Input}: unitary matrix $A \in U(n)$ \\
     \textbf{Output}: real vectors $\theta,\phi \in [0, 2\pi)^k$, $\lambda \in [0, 2\pi)^n$
@@ -607,13 +622,10 @@ This gives us the overall transformation from state to goal, which is also a uni
     \end{algorithmic}
 \end{algorithm}
 
-The generalized Euler angle encoding, or `Hurwitz' encoding of a unitary matrix is the unique decomposition
-of a matrix $A \in U(n)$ into $n^2$ angles ranging from $0$ to $2\pi$ given by algorithm \ref{alg:hurwitz}.
-Note that the pseudocode contains comparisons to 0, but in practice the values are compared within a tolerance value to ensure numerical stability.
+The generalized Euler angle encoding of a unitary matrix is the unique decomposition
+of a matrix $A \in U(n)$ into $n^2$ angles ranging from $0$ to $2\pi$ given by algorithm \ref{alg:euler}.
 For the purpose of quantum circuit synthesis, the global phase can also be removed by first projecting the unitary
-matrix into a special unitary matrix according to the function $\Pi : U(n) \rightarrow SU(n)$, defined as
-$\Pi (A) = e^{-i (\arg(\text{det}(A)))/n} A$.
-The last angle in $\lambda$ can then be disregarded, and the resulting representation will contain $n^2-1$ angles.
+matrix into a special unitary matrix and then disregarding the last angle in $\lambda$, leaving $n^2-1$ angles remaining.
 
 
 

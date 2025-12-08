@@ -603,7 +603,7 @@ each two-qubit unitary into a sequence of one-qubit unitaries and CNOT gates,
 and then use \textbf{trasyn} to synthesize those one-qubit unitaries.
 This process is shown in Figure \ref{fig:trasyn_multi_process}.
 We find that directly synthesizing circuits with A* search dramatically outperforms \textbf{trasyn},
-reducing gate count and $T$ count by about a factor of 3 on average.
+reducing gate count and $T$ count by about a factor of 3 on average, shown in Figure \ref{fig:benchmark} (b).
 
 
 
@@ -713,7 +713,7 @@ This reduces the 8 components of the matrix (4 real, 4 imaginary) down to 4 comp
     \end{algorithmic}
 \end{algorithm}
 
-The generalized Euler angle encoding of a unitary matrix is the unique decomposition
+The generalized Euler angle encoding \cite{diaconis2017hurwitz} of a unitary matrix is the unique decomposition
 of a matrix $A \in U(n)$ into $n^2$ angles ranging from $0$ to $2\pi$ given by algorithm \ref{alg:euler}.
 For the purpose of quantum circuit synthesis, the global phase can also be removed by first projecting the unitary
 matrix into a special unitary matrix and then disregarding the last angle in $\lambda$, leaving $n^2-1$ angles remaining.

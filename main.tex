@@ -191,7 +191,7 @@ approach is competitive.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.4\textwidth]{images/qc_ex.png}
+	\includegraphics[width=0.44\textwidth]{images/qc_ex.png}
 	\caption{Example of a quantum circuit composed of Clifford and T gates}
 	\label{fig:toffoli}
 \end{figure}
@@ -363,6 +363,26 @@ we must add the $T$ gate
 With the addition of the $T$ gate, the set will be able to approximate any unitary.
 
 
+
+\begin{figure*}
+	\begin{subfigure}{0.2\textwidth}
+		\includegraphics[width=\textwidth]{images/qc_U}
+		\caption{Arbitrary 2-qubit unitary}
+	\end{subfigure}
+	\begin{subfigure}{0.76\textwidth}
+		\includegraphics[width=\textwidth]{images/qc_U3}
+		\caption{Unitary decomposed into arbitrary 1-qubit unitaries and CNOTs}
+	\end{subfigure}
+	\\
+	\begin{subfigure}{\textwidth}
+		\includegraphics[width=\textwidth]{images/qc_tr}
+		\caption{Final compiled circuit after synthesizing each 1-qubit unitary with \textbf{trasyn}}
+	\end{subfigure}
+	\caption{Process for synthesis of multi-qubit circuits using \textbf{trasyn}}
+	\label{fig:trasyn_multi_process}
+\end{figure*}
+
+
 \paragraph{Unitary Synthesis}
 
 Given that discrete gate sets such as Clifford+T are likely to be the basis of near-term fault-tolerant quantum computing [CITATION NEEDED],
@@ -426,10 +446,10 @@ Many methods for unitary synthesis have been explored with domain-specific synth
 and \textbf{trasyn} \cite{hao2025reducing} use a gate sampling search guided by the unitary distance function. The program \textbf{gridsynth} \cite{ross2014optimal} uses advanced domain-specific knowledge to analytically synthesize optimal circuits, but is limited to only one-qubit $R_z(\theta)$ gates. These methods all compile unitaries with the objective of reducing the number of  $T$ gates, given that $T$ gates are dramatically more expensive to produce on quantum hardware than the Clifford gates
 [CITATION NEEDED].
 
-On the other hand, deep reinforcement learning and heuristic search has been used to synthesize quantum circuits.\citet{zhang2020topological} build on DeepCubeA to learn a heuristic function for topological quantum compilation of Fibonacci anyons. \cite{bao2024twisty} learn a heuristic function that is then used with beam search for Clifford gates. \cite{chen2024efficient} use deep Q-learning \cite{watkins1992q,mnih2015human} and Q* search \cite{agostinelli2024q} to perform one and two-qubit synthesis for Fibonacci anyons, HRC gate set \cite{harrow2002efficient}, and the Clifford + T gate set. \cite{weiden2025making} explores modifications to the neural networks
+On the other hand, deep reinforcement learning and heuristic search has been used to synthesize quantum circuits. \citet{zhang2020topological} build on DeepCubeA to learn a heuristic function for topological quantum compilation of Fibonacci anyons. \cite{bao2024twisty} learn a heuristic function that is then used with beam search for Clifford gates. \cite{chen2024efficient} use deep Q-learning \cite{watkins1992q,mnih2015human} and Q* search \cite{agostinelli2024q} to perform one and two-qubit synthesis for Fibonacci anyons, HRC gate set \cite{harrow2002efficient}, and the Clifford + T gate set. \cite{weiden2025making} explores modifications to the neural networks
 and training processes used in Clifford+T synthesis.  \citet{rietsch2024unitary} explores applications of reinforcement learning to Clifford + T synthesis for multiple qubits and find they are competitive with methods, such as synthetiq, in terms of gate length, but are 10 to 100 times slower for 2 and 3 qubits. 
 
-In contrast with previous methods for Cliffor+T synthesis, we first perform a systematic empirical study on what DNN encodings perform best for quantum circuit synthesis. After training the heuristic function, we use BWAS, to take advantage of paralellism provided by GPUs, which other methods often do not take advantage of. As a result, to the best of our knowledge, we are the first machine learning-based approach that is competitive with, and sometimes superior to, domain-specific programs, such as synthetiq and trasyn, in terms of both gate count and solve time. 
+In contrast with previous methods for Clifford+T synthesis, we first perform a systematic empirical study on what DNN encodings perform best for quantum circuit synthesis. After training the heuristic function, we use BWAS, to take advantage of paralellism provided by GPUs, which other methods often do not take advantage of. As a result, to the best of our knowledge, we are the first machine learning-based approach that is competitive with, and sometimes superior to, domain-specific programs, such as trasyn, in terms of gate count and T count. 
 
 % While these previous approaches assume a fixed goal of the identity matrix and use reverse quantum gates to find a path from a specified algorithm to the identity, we instead find a path from the identity to the specified algorithm using the given gate set. This then allows future iterations of our work to include the specification of sets of goal states through partial goal specification or abstraction through formal logic \cite{agostinelli2024specifying,agostinelli2025conflict}, offering greater flexibility to practitioners and reducing the knowledge required to specify an algorithm.
 
@@ -440,52 +460,75 @@ In contrast with previous methods for Cliffor+T synthesis, we first perform a sy
 \section{Approach}
 
 
+\subsection{State Representation}
+
+
+States are represented as unitary matrices.
+These matrices are the product of the matrices of all the actions taken to get to the state, multiplied together.
+We take advantage of the fact that unitary matrices are invertible, and multiply the inverse of the state matrix
+with the goal matrix when giving it as input to the neural network.
+We are allowed to do this because the problem of finding a matrix $M$ such that $MS=G$ is the the same as
+finding a matrix $M$ such that $M=GS^{-1}$ (here $S$ is the matrix of the current state, $G$ is the matrix of the goal state,
+and $M$ is the matrix representing the actions needed to go from the state to the goal).
+This gives us the overall transformation from state to goal, which is also a unitary matrix.
+
+
+\noindent
+[GLOBAL PHASE]
+
+
+
+\noindent
+[QUATERNIONS]
+
+
+
+\noindent
+[HURWITZ]
+
+
+
+\noindent
+[NERF ENCODING]
+
+
+
+
+\subsection{Training}
+
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.48\textwidth]{images/training1q}
+	\caption{Training progress for different state encoding methods on 1-qubit synthesis with $\epsilon=0.01$}
+	\label{fig:training}
+\end{figure}
+
+
+
+
+\subsection{Testing \& Verification}
+
+
 
 
 %% SECTION Experiments
 \section{Experiments}
 
 
+\subsection{Single-Qubit Synthesis}
 
-\begin{figure}
 
-	\begin{subfigure}{0.48\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{images/training1q}
-		\caption{Training progress for different state encoding methods on 1-qubit synthesis with $\epsilon=0.01$}
-	\end{subfigure}
 
-	\caption{Training progress for different models}
-	\label{fig:training}
+\subsection{Multi-Qubit Synthesis}
 
-\end{figure}
+
+
 
 
 
 \begin{figure*}
-	\begin{subfigure}{0.2\textwidth}
-		\includegraphics[width=\textwidth]{images/qc_U}
-		\caption{Arbitrary 2-qubit unitary}
-	\end{subfigure}
-	\begin{subfigure}{0.76\textwidth}
-		\includegraphics[width=\textwidth]{images/qc_U3}
-		\caption{Unitary decomposed into arbitrary 1-qubit unitaries and CNOTs}
-	\end{subfigure}
-	\\
-	\begin{subfigure}{\textwidth}
-		\includegraphics[width=\textwidth]{images/qc_tr}
-		\caption{Final compiled circuit after synthesizing each 1-qubit unitary with \textbf{trasyn}}
-	\end{subfigure}
-	\caption{Process for synthesis of multi-qubit circuits using \textbf{trasyn}}
-	\label{fig:trasyn_multi_process}
-\end{figure*}
-
-
-
-
-
-
-\begin{figure}
 	\centering
 
 	\begin{subfigure}{0.48\textwidth}
@@ -493,15 +536,14 @@ In contrast with previous methods for Cliffor+T synthesis, we first perform a sy
 		\includegraphics[width=\textwidth]{images/1q-bench}
 		\caption{1-qubit synthesis with $\epsilon=0.01$}
 	\end{subfigure}
-
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{images/2q-bench}
 		\caption{2-qubit synthesis with $\epsilon=0.5$}
 	\end{subfigure}
 
-	\caption{A* search vs \textbf{trasyn} for synthesis of arbitrary 1, 2, and 3-qubit unitaries}
-\end{figure}
+	\caption{A* search vs \textbf{trasyn} for synthesis of arbitrary 1 and 2-qubit unitaries}
+\end{figure*}
 
 
 

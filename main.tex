@@ -520,6 +520,22 @@ input data so that neural networks can perceive them, which has been shown to im
 	\label{fig:training}
 \end{figure}
 
+We use HER to generate training examples and, additionally, attempt to solve problem instances with a greedy
+policy using the target network and add states seen during solution attempts to the training set.
+The heuristic function is then trained with DAVI.
+After using HER to generate goal states,
+we apply perturbations to each goal matrix $U$ to generate matrices $\tilde{U}$ such that $d(U,\tilde{U})\leq\epsilon$,
+similar to the training process in \cite{weiden2025making}.
+This has been shown to make the training process more robust to approximate synthesis.
+
+After each update, we test our value function using a greedy policy.
+This policy can be defined as
+\begin{equation}
+    \pi(s)=\underset{a\in \mathcal{A}}{\text{argmin}}(c(s,a)+h_{\theta}(T(s,a),s_g))
+\end{equation}
+where $s_g$ is the goal state. The greedy policy simply selects the state which minimizes the value of the heuristic function plus the transition cost for all possible next states. We record the percentage of test states solved by the greedy policy after each iteration, and update our target network parameters $\theta^-$ only when this percentage has surpassed the previous best.
+A graph of the solved percentages after each training update is shown for several encoding methods in Figure \ref{fig:training}.
+
 
 
 

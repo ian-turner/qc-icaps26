@@ -385,7 +385,7 @@ With the addition of the $T$ gate, the set will be able to approximate any unita
 
 \paragraph{Unitary Synthesis}
 
-Given that discrete gate sets such as Clifford+T are likely to be the basis of near-term fault-tolerant quantum computing [CITATION NEEDED],
+Given that discrete gate sets such as Clifford+T are likely to be the basis of near-term fault-tolerant quantum computing,
 methods that can synthesize arbitrary unitaries from these discrete gate sets are needed.
 The problem of unitary synthesis is this: given a unitary specifiation $U$, find a sequence of gates
 ${g_1,...,g_n}$ chosen from a discrete gate set that implements a unitary $V = g_1 \times \cdots \times g_n$
@@ -443,13 +443,13 @@ We build on hindsight experience replay (HER) \cite{andrychowicz2017hindsight} t
 \section{Related Work}
 
 Many methods for unitary synthesis have been explored with domain-specific synthesizers. The programs \textbf{synthetiq} \cite{paradis2024synthetiq}
-and \textbf{trasyn} \cite{hao2025reducing} use a gate sampling search guided by the unitary distance function. The program \textbf{gridsynth} \cite{ross2014optimal} uses advanced domain-specific knowledge to analytically synthesize optimal circuits, but is limited to only one-qubit $R_z(\theta)$ gates. These methods all compile unitaries with the objective of reducing the number of  $T$ gates, given that $T$ gates are dramatically more expensive to produce on quantum hardware than the Clifford gates
-[CITATION NEEDED].
+and \textbf{trasyn} \cite{hao2025reducing} use a gate sampling search guided by the unitary distance function. The program \textbf{gridsynth} \cite{ross2014optimal} uses advanced domain-specific knowledge to analytically synthesize optimal circuits, but is limited to only one-qubit $R_z(\theta)$ gates. These methods all compile unitaries with the objective of reducing the number of  $T$ gates, given that $T$ gates are dramatically more expensive to produce on quantum hardware than the Clifford gates.
+
 
 On the other hand, deep reinforcement learning and heuristic search has been used to synthesize quantum circuits. \citet{zhang2020topological} build on DeepCubeA to learn a heuristic function for topological quantum compilation of Fibonacci anyons. \cite{bao2024twisty} learn a heuristic function that is then used with beam search for Clifford gates. \cite{chen2024efficient} use deep Q-learning \cite{watkins1992q,mnih2015human} and Q* search \cite{agostinelli2024q} to perform one and two-qubit synthesis for Fibonacci anyons, HRC gate set \cite{harrow2002efficient}, and the Clifford + T gate set. \cite{weiden2025making} explores modifications to the neural networks
 and training processes used in Clifford+T synthesis.  \citet{rietsch2024unitary} explores applications of reinforcement learning to Clifford + T synthesis for multiple qubits and find they are competitive with methods, such as synthetiq, in terms of gate length, but are 10 to 100 times slower for 2 and 3 qubits. 
 
-In contrast with previous methods for Clifford+T synthesis, we first perform a systematic empirical study on what DNN encodings perform best for quantum circuit synthesis. After training the heuristic function, we use BWAS, to take advantage of paralellism provided by GPUs, which other methods often do not take advantage of. As a result, to the best of our knowledge, we are the first machine learning-based approach that is competitive with, and sometimes superior to, domain-specific programs, such as trasyn, in terms of gate count and T count. 
+In contrast with previous methods for Clifford+T synthesis, we first perform a systematic empirical study on what DNN encodings perform best for quantum circuit synthesis. After training the heuristic function, we use BWAS, to take advantage of paralellism provided by GPUs, which other methods often do not take advantage of. As a result, to the best of our knowledge, we are the first machine learning-based approach that is competitive with, and sometimes superior to, domain-specific programs, such as trasyn, in terms of gate count and search time. 
 
 % While these previous approaches assume a fixed goal of the identity matrix and use reverse quantum gates to find a path from a specified algorithm to the identity, we instead find a path from the identity to the specified algorithm using the given gate set. This then allows future iterations of our work to include the specification of sets of goal states through partial goal specification or abstraction through formal logic \cite{agostinelli2024specifying,agostinelli2025conflict}, offering greater flexibility to practitioners and reducing the knowledge required to specify an algorithm.
 
@@ -483,10 +483,12 @@ This ensures that states that differ only by a global phase will be represented 
 We explore three methods of representing the unitaries when inputting them into the neural network.
 The first of these is simply to flatten the real and imaginary components of the matrix into a vector
 and input them into the neural network.
-The second is to convert them into quaternions, however this approach is only valid for the single-qubit case,
+The second is to convert them into quaternions,
+however this approach is only valid for the single-qubit case,
 which is represented by $SU(2)$.
 The third is the generalized Euler angle encoding, which maps a unitary $U \in U(n)$ to a set of $n^2-1$ angles
 which uniquely describe the matrix up to a global phase.
+The quaternion and Euler angle representations are described in more detail in the appendix.
 
 
 We also use Neural Radiance Field Encoding (NeRF) \cite{mildenhall2021nerf},
@@ -520,6 +522,25 @@ input data so that neural networks can perceive them, which has been shown to im
 	\label{fig:training}
 \end{figure}
 
+
+
+\begin{figure*}
+	\centering
+
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{images/1q-bench}
+		\caption{1-qubit synthesis with $\epsilon=0.01$}
+	\end{subfigure}
+	\begin{subfigure}{0.48\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{images/2q-bench}
+		\caption{2-qubit synthesis with $\epsilon=0.5$}
+	\end{subfigure}
+	\label{fig:benchmark}
+	\caption{A* search vs \textbf{trasyn} for synthesis of arbitrary 1 and 2-qubit unitaries}
+\end{figure*}
+
 We use HER to generate training examples and, additionally, attempt to solve problem instances with a greedy
 policy using the target network and add states seen during solution attempts to the training set.
 The heuristic function is then trained with DAVI.
@@ -542,6 +563,10 @@ A graph of the solved percentages after each training update is shown for severa
 \subsection{Testing \& Verification}
 
 
+For a testing dataset we use randomly generated 1000 unitaries on both one and two qubits using Qiskit.
+We then run A* search and save the solved circuits in the OpenQASM format \cite{cross2022openqasm},
+and import them into Qiskit to confirm their closeness to the original operators.
+
 
 
 %% SECTION Experiments
@@ -550,31 +575,36 @@ A graph of the solved percentages after each training update is shown for severa
 
 \subsection{Single-Qubit Synthesis}
 
+For single-qubit synthesis we found the best performance with Euler angle encoding and NeRF with $L=15$.
+Most of the performance boost was attributable to NeRF, although Euler angle encoding seems to lead to more
+stable training and slightly better search results.
+We trained a model for $\epsilon=0.01$, given that this is in the middle of the `comfort zone' for \textbf{trasyn},
+although a threshold of about $\epsilon=0.001$ for synthesis is ideal for near-term quantum computers \cite{hao2025reducing}.
+We then ran A* search with a batch size of 100 and a path weight of 1.0 and compared the results with \textbf{trasyn}.
+Both A* search and \textbf{trasyn} were able to find a circuit in all cases, usually in less than a second.
+The results in Figure \ref{fig:benchmark} (a) show that A* search is able to find the optimal T-count circuit
+in about $90\%$ of cases, and is only off by one or two $T$ gates when wrong. 
+However, A* search is able to find a circuit with a better gate count in about $70\%$ of cases.
+This is likely because \textbf{trasyn} optimizes $T$-count, but does not place the same importance on overall gate count,
+since $T$ gates are considered much more expensive than Clifford gates.
+
 
 
 \subsection{Multi-Qubit Synthesis}
 
 
+For multi-qubit synthesis we found the best performance with the matrix representation and NeRF encoding.
+We trained a model with a threshold of $\epsilon=0.5$.
+We ran A* search with a batch size of 100 and a path weight of 1.0, and compare the circuits with those generated
+with \textbf{trasyn}.
+Given that \textbf{trasyn} cannot directly synthesize two-qubit circuits, we first have to decompose
+each two-qubit unitary into a sequence of one-qubit unitaries and CNOT gates,
+and then use \textbf{trasyn} to synthesize those one-qubit unitaries.
+This process is shown in Figure \ref{fig:trasyn_multi_process}.
+We find that directly synthesizing circuits with A* search dramatically outperforms \textbf{trasyn},
+reducing gate count and $T$ count by about a factor of 3 on average.
 
 
-
-
-\begin{figure*}
-	\centering
-
-	\begin{subfigure}{0.48\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{images/1q-bench}
-		\caption{1-qubit synthesis with $\epsilon=0.01$}
-	\end{subfigure}
-	\begin{subfigure}{0.48\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{images/2q-bench}
-		\caption{2-qubit synthesis with $\epsilon=0.5$}
-	\end{subfigure}
-
-	\caption{A* search vs \textbf{trasyn} for synthesis of arbitrary 1 and 2-qubit unitaries}
-\end{figure*}
 
 
 
@@ -582,15 +612,47 @@ A graph of the solved percentages after each training update is shown for severa
 %% SECTION Discussion and Future Work
 \section{Discussion and Future Work}
 
+This work only considers unitary operations, but some quantum computers now support dynamic circuits,
+which involve measurements during the circuit and further operations conditioned on the measurement outcomes.
+Previous work has shown that repeat-until-success circuits can be
+used to create more optimal fault-tolerant gates \cite{bocharov2015efficient}.
+‘Magic’ state distillation \cite{bravyi2005universal} has also been explored as a potential
+way of implementing non-Clifford gates fault-tolerantly.
+The measurement-based quantum computing paradigm even offers an alternative to the unitary quantum circuit model,
+where the same ‘resource state’ is prepared every time, and computation is carried out exclusively by measurements
+\cite{briegel2009measurement}.
+Future work could involve expanding the search space to include those more exotic circuits.
+
+Our approach gives the desired quantum algorithm as a goal to the heuristic function.
+There may be cases where only partial information of the properties the quantum algorithm should have are known.
+In these cases, this could correspond to not knowing all entries in the matrix that represents the algorithm.
+Work on generalizing over goals can be used to train a heuristic function that can be given a partially
+specified algorithm by having a special indicator for entries that are not known or through abstractions based on formal
+logic \cite{agostinelli2024specifying}.
 
 
 
 %% SECTION Conclusion
 \section{Conclusion}
 
+Efficient unitary synthesis will be crucial to fault-tolerant quantum computing in the near future,
+allowing programmers to translate their high-level algorithm descriptions to low-level implementations on quantum hardware.
+We extend DeepCubeA and HER to learn a domain-specific heuristic to
+estimate cost-to-go from a given algorithm to a given goal algorithm for the Clifford+T gate set.
+We then use this heuristic function in combination with BWAS to find circuits that implement the given goal algorithm.
+We compare the results of BWAS with a state-of-the-art unitary synthesis program.
+Future work could achieve improvements by finding a better encoding for unitary matrices
+and extending the algorithm to allow for synthesis of partial specifications and dynamic circuits.
+
 
 
 \appendix
+
+
+\section{Quaternion Encoding}
+
+
+
 
 \section{Euler Angle Encoding}
 

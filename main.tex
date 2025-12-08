@@ -528,7 +528,6 @@ input data so that neural networks can perceive them, which has been shown to im
 
 \begin{figure*}
 	\centering
-
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{images/1q-bench}
@@ -539,8 +538,8 @@ input data so that neural networks can perceive them, which has been shown to im
 		\includegraphics[width=\textwidth]{images/2q-bench}
 		\caption{2-qubit synthesis with $\epsilon=0.5$}
 	\end{subfigure}
-	\label{fig:benchmark}
 	\caption{A* search vs \textbf{trasyn} for synthesis of arbitrary 1 and 2-qubit unitaries}
+	\label{fig:benchmark}
 \end{figure*}
 
 We use HER to generate training examples and, additionally, attempt to solve problem instances with a greedy
@@ -654,6 +653,18 @@ and extending the algorithm to allow for synthesis of partial specifications and
 \section{Quaternion Encoding}
 
 
+Quaternions have been explored as an alternative encoding method for single-qubit unitary matrices \cite{alam2023quantum}.
+The quaternions are the group of numbers $a+bi+cj+dk$ where $a,b,c,d$ are scalers and $i,j,k$ are the
+unit quaternions, with the relationship $i^2=j^2=k^2=ijk=-1$.
+The can be used to represent a matrix $A \in SU(2)$ by using the relationship
+\begin{equation}
+	A =
+	\begin{bmatrix}
+		a+ib & c+id \\
+		-c+id & a-ib
+	\end{bmatrix}
+\end{equation}
+This reduces the 8 components of the matrix (4 real, 4 imaginary) down to 4 components.
 
 
 \section{Euler Angle Encoding}
@@ -706,6 +717,8 @@ The generalized Euler angle encoding of a unitary matrix is the unique decomposi
 of a matrix $A \in U(n)$ into $n^2$ angles ranging from $0$ to $2\pi$ given by algorithm \ref{alg:euler}.
 For the purpose of quantum circuit synthesis, the global phase can also be removed by first projecting the unitary
 matrix into a special unitary matrix and then disregarding the last angle in $\lambda$, leaving $n^2-1$ angles remaining.
+Euler angle decomposition has been explored in the context of single-qubit synthesis \cite{alam2023quantum},
+but to our knowledge we are the first to apply a generalized version to multi-qubit synthesis.
 
 
 

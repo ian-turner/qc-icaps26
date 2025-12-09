@@ -174,15 +174,7 @@
 % TODO: accentuate competitive (and sometimes superior) in terms of coverage, gate count, and time
 % TODO: can change title to focus on Clifford + T?
 Quantum circuit synthesis is the process of implementing
-a quantum algorithm with a given gate set. In this
-paper, we first show how this problem can be posed as a
-pathfinding problem. Next, we use DeepCubeA to learn a
-heuristic function for quantum circuit synthesis for one and
-two qubit Clifford+T circuits with deep reinforcement learning and
-solve problem instances with batch weighed A* search. We
-compare our approach against a state-of-the-art
-quantum circuit synthesis tool and show that are our
-approach is competitive.
+a quantum algorithm with a given gate set. In this paper, we first show how this problem can be posed as a pathfinding problem. Next, we do an empirical evaluation of which problem instance encodings result in better coverage when training a heuristic function with DeepCubeA. Then, we use the best encoding found to learn a heuristic function for quantum circuit synthesis for one and two qubit Clifford+T circuits and solve problem instances with batch weighed A* search. We compare our approach against a state-of-the-art quantum circuit synthesis tool, \textbf{trasyn}. We show that our approach equals \textbf{trasyn} in terms of coverage while being comparable (and sometimes superior) to \textbf{trasyn} in terms of gate count and T count.
 \end{abstract}
 
 
@@ -211,24 +203,13 @@ is the identity matrix, the goal is a given quantum algorithm, the transitions a
 are determined by a combination of quantum gate execution time and the noise the gate introduces.
 
 
-Finding quantum circuits that implement a given algorithm is a non-trivial task that can sometimes take state-of-the-art
-methods several hours, even for single qubit operators \cite{paradis2024synthetiq}.
+Finding quantum circuits that implement a given algorithm is a non-trivial task that can sometimes take state-of-the-art methods several hours, even for single qubit operators \cite{paradis2024synthetiq}.
 Given that we can pose this as a pathfinding problem, we build on the DeepCubeA algorithm \cite{agostinelli2019solving}
 and hindsight experience replay (HER) \cite{andrychowicz2017hindsight} to use deep reinforcement learning to learn
 a heuristic function that maps a given quantum circuit and quantum goal algorithm to an estimate of the cost of a
 shortest path (i.e. ``cost-to-go'') from the given circuit to a circuit that implements the goal algorithm.
-Previous work that has built on DeepCubeA to perform quantum compiling used the reversibility of quantum gates
-to set the starting state to be the quantum algorithm and the goal to be the identity matrix
-\cite{zhang2020topological,bao2024twisty,chen2024efficient}.
-Our work distinguishes itself from this previous work since the starting state is the identity matrix and the goal is
-given as the quantum algorithm.
-This distinction then allows our approach to be modified for the specification of goals as
-a set of goal states through partial specification of goal matrix entries or through abstraction using formal logic.
-This may be necessary if certain properties of the algorithm (i.e. entries in the matrix) are known while other parts are not
-known or not relevant.
-These modifications that allow for this are already present in existing literature \cite{agostinelli2024specifying}
-and can be applied to the work presented in the paper.
 
+Since we specify quantum algorithms with floating point numbers, we first do an empirical study on the best representation of a quantum algorithm to a deep neural network (DNN) \cite{schmidhuber2015deep, lecun2015deep} trained with reinforcement learning to synthesize circuits. We find that simply giving the raw floating point numbers to the DNN results in poor performance compared to encodings such as the Euler angle encoding \cite{diaconis2017hurwitz}. We then use the best encoding found to learn a heuristic function and solve problem instances with batch weighted A* search. When comparing our results to a domain-specific solver, \textbf{trasyn}, we find that we maintain 100\% coverage (i.e. solve 100\% of problem instances) while also having similar gate count for 1 qubit synthesis and superior gate count for 2 qubit synthesis.
 
 
 
@@ -400,19 +381,16 @@ When $\epsilon > 0$, we classify the problem as approximate synthesis, and when 
 Pathfinding is the process of finding a sequence of actions that forms a path between a given start state and a given goal, where a goal is a set of states considered goal states. A pathfinding domain is defined by a weighted directed graph, where nodes represent states, edges represent transitions between states, and weights represent transition costs \cite{pohl1970heuristic}. The transitions can be thought of as resulting from a set of actions, $\mathcal{A}$, and the transition function function, $T$, returns state, $s'$, given state, $s$, and action, $a$, if and only if there is an edge between state $s$ and $s'$ for some action, $a$ (i.e. $s' = T(s,a)$). The transition cost function, $c$, returns the cost of taking action, $a$, in states, $s$ (i.e. $c(s,a)$). Given a domain, a pathfinding problem instance is defined by a start state and a goal. Given a path that is a solution to a problem instance, the path cost is the sum of transition costs. In this work, the states are matrices representing quantum algorithms, transitions are the application of quantum gates, which produce new matrices, and transition costs are 1 for all gates. In future work, we will consider assigning a higher transition cost to gates, such as the $T$ gate, which add more execution time or noise to the circuit.
 
 \subsubsection{Heuristic Search}
-A* search \cite{hart1968formal} is a search algorithm designed to find a path between two nodes in a weighted directed graph. Similar to other algorithms like depth-first search and Djikstra's algorithm, A* keeps a priority queue of nodes, ordered from least to greatest according
-to the function
+A* search \cite{hart1968formal} is a search algorithm designed to find a path between a start node and a node in a set of goal nodes in a weighted directed graph. A* maintains a priority queue of nodes, ordered from least to greatest according to the function
 \begin{equation}
     f(n)=g(n)+h(n)
 \end{equation}
 where $g(n)$ is the path cost (sum of all transition costs taken to reach node
 $n$ and $h(n)$ is the heuristic function value of state associated with $n$.
 
-While searching each node keeps track of the path cost and heuristic function value
-as well as a connection to its parent node and the action taken to generate the state from its parent. The A* search process is begun when a single node with no parents representing the start state is added to the queue, and is ended once a node associated with a goal state is selected for expansion or there are no more nodes to expand.
+While searching each node keeps track of the path cost and heuristic function value as well as a pointer to its parent node and the action taken to generate the state associated with that node from its parent node. A* search starts with a single node with no parents representing the start state in the priority queue, and ends once a node associated with a goal state is selected for expansion or there are no more nodes to expand.
 
-In practice, a significant speedup can be achieved with heuristic functions represented by neural networks by batching the expansion steps together and exploiting the parallelism of graphics processing units (GPUs), as well as modifying the cost function to be $f(n)=\lambda g(n)+h(n)$,
-where $\lambda \in [0,1]$ can be adjusted to place less important on the path cost of a state and more on the heuristic value. This batched and weighted version of A* search is referred to as batch weighted A* search (BWAS).
+In practice, a significant speedup can be achieved with heuristic functions represented by neural networks by batching the expansion steps together and exploiting the parallelism of graphics processing units (GPUs), as well as using weighted A* search \cite{pohl1970heuristic} by modifying the cost function to be $f(n)=\lambda g(n)+h(n)$. In this setting, $\lambda \in [0,1]$ and can be adjusted to place less weight on the path cost, thus giving the heuristic value more influence when prioritizing nodes. This batched and weighted version of A* search is referred to as batch weighted A* search (BWAS) \cite{agostinelli2019solving}.
 
 \subsection{DeepCubeA}
 
@@ -448,10 +426,10 @@ Many methods for unitary synthesis have been explored with domain-specific synth
 and \textbf{trasyn} \cite{hao2025reducing} use a gate sampling search guided by the unitary distance function. The program \textbf{gridsynth} \cite{ross2014optimal} uses advanced domain-specific knowledge to analytically synthesize optimal circuits, but is limited to only one-qubit $R_z(\theta)$ gates. These methods all compile unitaries with the objective of reducing the number of  $T$ gates, given that $T$ gates are dramatically more expensive to produce on quantum hardware than the Clifford gates.
 
 
-On the other hand, deep reinforcement learning and heuristic search has been used to synthesize quantum circuits. \citet{zhang2020topological} build on DeepCubeA to learn a heuristic function for topological quantum compilation of Fibonacci anyons. \cite{bao2024twisty} learn a heuristic function that is then used with beam search for Clifford gates. \cite{chen2024efficient} use deep Q-learning \cite{watkins1992q,mnih2015human} and Q* search \cite{agostinelli2024q} to perform one and two-qubit synthesis for Fibonacci anyons, HRC gate set \cite{harrow2002efficient}, and the Clifford + T gate set. \cite{weiden2025making} explores modifications to the neural networks
+On the other hand, deep reinforcement learning and heuristic search has been used to synthesize quantum circuits. \citet{zhang2020topological} build on DeepCubeA to learn a heuristic function for topological quantum compilation of Fibonacci anyons. \cite{bao2024twisty} learn a heuristic function that is then used with beam search for synthesis with Clifford gates. \cite{chen2024efficient} use deep Q-learning \cite{watkins1992q,mnih2015human} and Q* search \cite{agostinelli2024q} to perform one and two-qubit synthesis for Fibonacci anyons, HRC gate set \cite{harrow2002efficient}, and the Clifford + T gate set. \citet{weiden2025making} explores modifications to the neural networks
 and training processes used in Clifford+T synthesis.  \citet{rietsch2024unitary} explores applications of reinforcement learning to Clifford + T synthesis for multiple qubits and find they are competitive with methods, such as synthetiq, in terms of gate length, but are 10 to 100 times slower for 2 and 3 qubits. 
 
-In contrast with previous methods for Clifford+T synthesis, we first perform a systematic empirical study on what DNN encodings perform best for quantum circuit synthesis. After training the heuristic function, we use BWAS, to take advantage of paralellism provided by GPUs, which other methods often do not take advantage of. As a result, to the best of our knowledge, we are the first machine learning-based approach that is competitive with, and sometimes superior to, domain-specific programs, such as trasyn, in terms of gate count and search time. 
+In contrast with previous methods for Clifford+T synthesis, we first perform a systematic empirical study on what DNN encodings perform best for quantum circuit synthesis. After training the heuristic function, we use BWAS, to take advantage of paralellism provided by GPUs, which other methods often do not take advantage of. As a result, to the best of our knowledge, we are the first machine learning-based approach that is competitive with, and sometimes superior to, domain-specific programs, such as \textbf{trasyn}, in terms of coverage and gate count while also being within an order of magnitude in terms of speed. 
 
 % While these previous approaches assume a fixed goal of the identity matrix and use reverse quantum gates to find a path from a specified algorithm to the identity, we instead find a path from the identity to the specified algorithm using the given gate set. This then allows future iterations of our work to include the specification of sets of goal states through partial goal specification or abstraction through formal logic \cite{agostinelli2024specifying,agostinelli2025conflict}, offering greater flexibility to practitioners and reducing the knowledge required to specify an algorithm.
 
@@ -474,10 +452,7 @@ We are allowed to do this because the problem of finding a matrix $M$ such that 
 finding a matrix $M$ such that $M=GS^{-1}$ (here $S$ is the matrix of the current state, $G$ is the matrix of the goal state,
 and $M$ is the matrix representing the actions needed to go from the state to the goal).
 This gives us the overall transformation from state to goal, which is also a unitary matrix.
-We explore three methods of representing the unitaries when inputting them into the neural network.
-The first of these is simply to flatten the real and imaginary components of the matrix into a vector
-and input them into the neural network.
-The second and third are the quaternion encoding and the Euler angle encoding, described below.
+We explore four methods of representing the unitaries to heuristic functions represented as DNNs and trained with deep reinforcement learning. These methods are: 1) a simple flat representations of the real and imaginary components of the matrix into a vector; 2) the quaternion encoding; 3) the Euler angle encoding; and 4) the neural radiance field encoding.
 
 
 \paragraph{Quaternion encoding}
@@ -557,7 +532,7 @@ To handle the global phase invariance property of quantum circuits, we project t
 special unitary group, which is isomorphic to the unitary group up to a global phase.
 This results in a function $\Pi : U(n) \rightarrow SU(n)$, defined as
 $\Pi (A) = e^{-i (\arg(\text{det}(A)))/n} A$.
-This ensures that states that differ only by a global phase will be represented equivalently when input to the neural network.
+This ensures that states that differ only by a global phase will be represented equivalently when given as input to the neural network.
 
 
 
@@ -565,7 +540,7 @@ This ensures that states that differ only by a global phase will be represented 
 We also use Neural Radiance Field Encoding (NeRF) \cite{mildenhall2021nerf},
 which was originally developed for image processing, but has been shown to improve neural network performance when
 dealing with unitary matrices \cite{weiden2025making}.
-NeRF encoding can be described as a function $\gamma : \mathbb{R} \rightarrow \mathbb{R}^{2L}$ that maps real numbers
+The NeRF encoding can be described as a function $\gamma : \mathbb{R} \rightarrow \mathbb{R}^{2L}$ that maps real numbers
 to a vector of $2L$ real numbers, where $L$ is an arbitrary parameter.
 The function is defined as
 \begin{equation}
@@ -601,11 +576,13 @@ input data so that neural networks can perceive them, which has been shown to im
 		\centering
 		\includegraphics[width=\textwidth]{images/1q-bench}
 		\caption{1-qubit synthesis with $\epsilon=0.01$}
+        \label{fig:onequbit}
 	\end{subfigure}
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{images/2q-bench}
 		\caption{2-qubit synthesis with $\epsilon=0.5$}
+        \label{fig:twoqubit}
 	\end{subfigure}
 	\caption{A* search vs \textbf{trasyn} for synthesis of arbitrary 1 and 2-qubit unitaries}
 	\label{fig:benchmark}
@@ -617,14 +594,13 @@ The heuristic function is then trained with DAVI.
 After using HER to generate goal states,
 we apply perturbations to each goal matrix $U$ to generate matrices $\tilde{U}$ such that $d(U,\tilde{U})\leq\epsilon$,
 similar to the training process in \cite{weiden2025making}.
-This has been shown to make the training process more robust to approximate synthesis.
+This has been shown to make the trained heuristic function more effective when applied to approximate synthesis.
 
-After each update, we test our value function using a greedy policy.
-This policy can be defined as
+After each update, we test our value function using a greedy policy. The greedy policy simply selects the state which minimizes the value of the heuristic function plus the transition cost for all possible next states, as defined here:
 \begin{equation}
-    \pi(s)=\underset{a\in \mathcal{A}}{\text{argmin}}(c(s,a)+h_{\theta}(T(s,a),s_g))
+    \pi(s)=\underset{a\in \mathcal{A}}{\text{argmin}}(c(s,a)+h_{\theta}(T(s,a),g))
 \end{equation}
-where $s_g$ is the goal state. The greedy policy simply selects the state which minimizes the value of the heuristic function plus the transition cost for all possible next states. We record the percentage of test states solved by the greedy policy after each iteration, and update our target network parameters $\theta^-$ only when this percentage has surpassed the previous best.
+We record the percentage of test states solved by the greedy policy after each iteration, and update our target network parameters, $\theta^-$, only when this percentage has surpassed the previous best.
 
 
 
@@ -641,43 +617,28 @@ and import them into Qiskit to confirm their closeness to the original operators
 %% SECTION Experiments
 \section{Experiments}
 
+\subsection{Encoding}
+To evaluate encodings, we train a heuristic function for single qubit approximate synthesis with $\epsilon=0.01$. We train the heuristic function with a flat representation of floating point numbers, as well as with a combination of Euler angle encodings, quaternion encodings, and NeRF. Results are shown in Figure \ref{fig:training}. The results show that a combination of Euler and NeRF encodings performs the best, where NeRF uses $L=15$.
 
 \subsection{Single-Qubit Synthesis}
+%We trained a model for $\epsilon=0.01$, given that this is in the middle of the `comfort zone' for \textbf{trasyn},
+%although a threshold of about $\epsilon=0.001$ for synthesis is ideal for near-term quantum computers \cite{hao2025reducing}.
 
-For single-qubit synthesis we found the best performance with Euler angle encoding and NeRF with $L=15$.
-Most of the performance boost was attributable to NeRF, although Euler angle encoding seems to lead to more
-stable training and slightly better search results.
-We trained a model for $\epsilon=0.01$, given that this is in the middle of the `comfort zone' for \textbf{trasyn},
-although a threshold of about $\epsilon=0.001$ for synthesis is ideal for near-term quantum computers \cite{hao2025reducing}.
-A graph of the solved percentages after each training update is shown for several encoding methods in Figure \ref{fig:training}.
-
-We then ran A* search with a batch size of 100 and a path weight of 1.0 and compared the results with \textbf{trasyn}.
-The results in Figure \ref{fig:benchmark} (a) show that A* search is able to find the optimal T-count circuit
-in about $90\%$ of cases, and is only off by one or two $T$ gates when wrong. 
-However, A* search is able to find a circuit with a better gate count in about $70\%$ of cases.
-This is likely because \textbf{trasyn} optimizes $T$-count, but does not place the same importance on overall gate count,
-since $T$ gates are considered much more expensive than Clifford gates.
-Both A* search and \textbf{trasyn} were able to find a circuit in all cases, usually in a few seconds,
+To solve problem instances for single qubit synthesis, we perform BWAS with a batch size of 100 and a weight of 1.0 and compared our results to \textbf{trasyn}. The results in Figure \ref{fig:onequbit} show that BWAS is able to find the optimal T-count circuit in about $90\%$ of cases, and only has one or two more $T$ gates than \textbf{trasyn}, otherwise. However, BWAS is able to find a circuit with a better gate count in about $70\%$ of cases. This is likely because \textbf{trasyn} optimizes $T$-count, but does not place the same importance on overall gate count, since $T$ gates are considered much more expensive than Clifford gates. Both A* search and \textbf{trasyn} were able to find a circuit in all cases, usually in a few seconds,
 although A* search is still about 5-10 times slower than \textbf{trasyn} in some cases.
-
 
 
 \subsection{Multi-Qubit Synthesis}
 
 
-For multi-qubit synthesis we found the best performance with the matrix representation and NeRF encoding.
-We trained a model with a threshold of $\epsilon=0.5$.
-We ran A* search with a batch size of 100 and a path weight of 1.0, and compare the circuits with those generated
-with \textbf{trasyn}.
-Given that \textbf{trasyn} cannot directly synthesize two-qubit circuits, we first have to decompose
+For multi-qubit synthesis we found the best performance with the matrix representation and NeRF encoding. We trained a heuristic function for approximate synthesis with a threshold of $\epsilon=0.5$. We ran BWAS with a batch size of 100 and weight of 1.0. Given that \textbf{trasyn} cannot directly synthesize two-qubit circuits, we first have to decompose
 each two-qubit unitary into a sequence of one-qubit unitaries and CNOT gates,
 and then use \textbf{trasyn} to synthesize those one-qubit unitaries.
 This process is shown in Figure \ref{fig:trasyn_multi_process}.
 We find that directly synthesizing circuits with A* search dramatically outperforms \textbf{trasyn},
 reducing gate count and $T$ count by about a factor of 3 on average, shown in Figure \ref{fig:benchmark} (b).
 However, the search time for A* search in this setting is much less consistent.
-Most instances finish within a few seconds, within an order of magnitude of the \textbf{trasyn} time, but some
-problem instances take up to a minute to finish, although A* search is still able to find a circuit in all cases.
+Most instances finish within a few seconds, within an order of magnitude of the \textbf{trasyn} time, but some problem instances take up to a minute to finish, although A* search is still able to find a circuit in all cases.
 
 
 
@@ -698,14 +659,11 @@ where the same ‘resource state’ is prepared every time, and computation is c
 \cite{briegel2009measurement}.
 Future work could involve expanding the search space to include those more exotic circuits.
 
-Our approach gives the desired quantum algorithm as a goal to the heuristic function.
-There may be cases where only partial information of the properties the quantum algorithm should have are known.
-In these cases, this could correspond to not knowing all entries in the matrix that represents the algorithm.
-Work on generalizing over goals can be used to train a heuristic function that can be given a partially
-specified algorithm by having a special indicator for entries that are not known or through abstractions based on formal
-logic \cite{agostinelli2024specifying}.
 
-
+Previous work that has built on DeepCubeA to perform quantum compiling used the reversibility of quantum gates
+to set the starting state to be the quantum algorithm and the goal to be the identity matrix
+\cite{zhang2020topological,bao2024twisty,chen2024efficient}. However, there may be cases where only partial information of the properties the quantum algorithm should have are known. In these cases, this could correspond to not knowing all entries in the matrix that represents the algorithm. Our work distinguishes itself from this previous work since the starting state is the identity matrix and the goal is given as the quantum algorithm. This distinction then allows our approach to be modified for the specification of goals as a set of goal states through partial specification of goal matrix entries or through abstraction using formal logic. These modifications that allow for this are already present in existing literature \cite{agostinelli2024specifying}
+and can be applied to the work presented in the paper.
 
 %% SECTION Conclusion
 \section{Conclusion}

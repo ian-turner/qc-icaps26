@@ -554,7 +554,7 @@ The function is defined as
 	\end{bmatrix}.
 \end{equation}
 It ensures that the input will be between $-1$ and $1$, and has the effect of amplifying small or high-frequency variations in
-input data so that neural networks can perceive them, which has been shown to improve performance in a variety of domains.
+input data so that neural networks can perceive them.
 
 
 \subsection{Training}
@@ -578,6 +578,7 @@ input data so that neural networks can perceive them, which has been shown to im
 		\caption{1-qubit synthesis with $\epsilon=0.01$}
         \label{fig:onequbit}
 	\end{subfigure}
+	\hfill
 	\begin{subfigure}{0.48\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{images/2q-bench}
@@ -638,7 +639,7 @@ This process is shown in Figure \ref{fig:trasyn_multi_process}.
 We find that directly synthesizing circuits with A* search dramatically outperforms \textbf{trasyn},
 reducing gate count and $T$ count by about a factor of 3 on average, shown in Figure \ref{fig:benchmark} (b).
 However, the search time for A* search in this setting is much less consistent.
-Most instances finish within a few seconds, within an order of magnitude of the \textbf{trasyn} time, but some problem instances take up to a minute to finish, although A* search is still able to find a circuit in all cases.
+Most instances finish within a few seconds, within an order of magnitude of the \textbf{trasyn} time, but some problem instances take several minutes to finish, although A* search is still able to find a circuit in all cases.
 
 
 
